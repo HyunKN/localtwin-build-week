@@ -26,4 +26,16 @@ describe("translateEnglishText", () => {
       "Same category · Counts only stores in the selected category.",
     );
   });
+
+  it("translates map, ranking, and background-population labels", () => {
+    expect(translateEnglishText("동일 업종 밀도 · 지표별 순위 · 시간대별 활동성")).toBe(
+      "Same-category density · Metric rankings · Activity by time of day",
+    );
+    expect(translateEnglishText("서울 길단위인구가 제공하는 6개 시간 구간입니다.")).toBe(
+      "Six time intervals from Seoul street-level population data.",
+    );
+    expect(translateEnglishText("KOSIS 주민등록인구 · 20251 · 과거 기준 · 행정동")).toBe(
+      "KOSIS resident registration population · 2025 Q1 · Historical reference · Administrative district",
+    );
+  });
 });

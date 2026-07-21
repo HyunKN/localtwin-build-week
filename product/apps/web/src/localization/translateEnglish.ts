@@ -171,12 +171,16 @@ const replacements: Record<string, string> = {
   "6개 시간대 공식 집계를 0~100으로 정규화해 표시합니다. 개인 이동 정보가 아닙니다.": "Six official time-bucket aggregates are normalized to 0–100. This is not individual movement data.",
   "서울 peer 백분위의 수요·점포당 매출·폐업·업종 밀도·순증률만 반영합니다.": "The score uses Seoul peer percentiles for demand, sales per store, closures, category density, and net openings.",
   "동일 업종 점포": "Same-category stores",
+  "동일 업종 밀도": "Same-category density",
   "동일 업종": "Same category",
   "선택 업종과 같은 점포만 집계합니다.": "Counts only stores in the selected category.",
   "점포당 추정매출": "Estimated sales per store",
   "개·폐업 현황": "Openings and closures",
   "상주·직장인구": "Residents and workers",
   "시간대별 유동인구": "Foot traffic by time of day",
+  "시간대별 활동성": "Activity by time of day",
+  "서울 길단위인구가 제공하는 6개 시간 구간입니다.": "Six time intervals from Seoul street-level population data.",
+  "지표별 순위": "Metric rankings",
   "점수 산정 근거": "Score evidence",
   "개업": "Openings",
   "폐업": "Closures",
@@ -194,6 +198,21 @@ const replacements: Record<string, string> = {
   "상권·행정동 인구": "Market-area and administrative-district population",
   "공간 단위 분리": "Separate spatial units",
   "서울시 상권 경계": "Seoul market boundary",
+  "서울시 상권분석서비스 길단위인구": "Seoul Commercial Area Analysis Service street-level population",
+  "서울시 상권분석서비스 상주인구": "Seoul Commercial Area Analysis Service market-area residents",
+  "서울시 상권분석서비스 직장인구": "Seoul Commercial Area Analysis Service market-area workers",
+  "KOSIS 주민등록인구": "KOSIS resident registration population",
+  "KOSIS 전국사업체조사": "KOSIS national business census",
+  "행정동 배후통계": "Administrative-district background statistics",
+  "행정동 주민": "Administrative-district residents",
+  "행정동 종사자": "Administrative-district workers",
+  "사업체": "Businesses",
+  "상권 경계와 행정동 경계는 다릅니다.": "Market-area and administrative-district boundaries differ.",
+  "서울시 상권 polygon과 행정동 경계는 다르며 인구를 상권에 배분하지 않는다.": "Seoul market-area polygons and administrative-district boundaries differ; population is not allocated to market areas.",
+  "과거 기준": "Historical reference",
+  "연남동": "Yeonnam-dong",
+  "서교동": "Seogyo-dong",
+  "합정동": "Hapjeong-dong",
   "조회 중": "Loading",
   "상주 밀도": "Resident density",
   "직장 밀도": "Worker density",
@@ -220,7 +239,9 @@ export function translateEnglishText(value: string) {
   return translated
     .replace(/(\d{4})년\s*(\d)분기 기준/g, "$1 Q$2")
     .replace(/(\d{4})년\s*(\d)분기/g, "$1 Q$2")
+    .replace(/\b(\d{4})([1-4])\b/g, "$1 Q$2")
     .replace(/(\d{4})\.(\d)Q 기준/g, "$1 Q$2")
+    .replace(/(\d+)개 동 중 (\d+)위/g, "#$2 of $1 districts")
     .replace(/(\d+)\/(\d+)위/g, "#$1 of $2")
     .replace(/(\d{2})~(\d{2})시/g, "$1:00–$2:00")
     .replace(/(\d[\d,]*)원/g, "₩$1")
