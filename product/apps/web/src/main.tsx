@@ -2,6 +2,7 @@ import { StrictMode, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 
 import App from "./App.tsx";
+import { EnglishApp } from "./localization/EnglishApp.tsx";
 
 const root = document.getElementById("root");
 
@@ -21,12 +22,7 @@ function renderApplication(application: ReactNode) {
 }
 
 if (showEnglishSubmission) {
-  renderApplication(<main aria-busy="true">Loading the English submission view…</main>);
-  void import("./submission/EnglishSubmissionApp.tsx")
-    .then(({ EnglishSubmissionApp }) => renderApplication(<EnglishSubmissionApp />))
-    .catch(() =>
-      renderApplication(<main role="alert">The English submission view could not be loaded.</main>),
-    );
+  renderApplication(<EnglishApp />);
 } else if (showFlowerMapPrototype) {
   renderApplication(<main aria-busy="true">꽃 테마 점포 지도를 준비하는 중입니다.</main>);
   void import("./features/map/storefronts/FlowerStorefrontMapPrototype.tsx")

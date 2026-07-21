@@ -44,6 +44,7 @@ import { useWorkspacePanels } from "./features/workspace/useWorkspacePanels";
 import { useStoreSelection } from "./features/market/useStoreSelection";
 import type { ScoreDecisionBlocker } from "./services/marketAnalysis";
 import type { ProductCatalog, SupportedMarket } from "./services/productCatalog";
+import { submissionCatalog } from "./services/submissionCatalog";
 import "./styles/global.css";
 
 const SceneWorkspace = lazy(() =>
@@ -139,8 +140,8 @@ function initialAnalysisUrlState(catalog: ProductCatalog) {
   );
 }
 
-export function App() {
-  const { catalog, state, retry } = useProductCatalog();
+export function App({ useDemoData = false }: { useDemoData?: boolean }) {
+  const { catalog, state, retry } = useProductCatalog(useDemoData ? submissionCatalog : undefined);
   if (state === "loading")
     return <main className="app-bootstrap">지원 범위를 불러오는 중입니다.</main>;
   if (!catalog || catalog.markets.length === 0) {
@@ -153,10 +154,10 @@ export function App() {
       </main>
     );
   }
-  return <ProductWorkspace catalog={catalog} />;
+  return <ProductWorkspace catalog={catalog} useDemoData={useDemoData} />;
 }
 
-function ProductWorkspace({ catalog }: { catalog: ProductCatalog }) {
+function ProductWorkspace({ catalog, useDemoData }: { catalog: ProductCatalog; useDemoData: boolean }) {
   const compactMap = useCompactMap();
   const markets = useMemo(
     () =>
@@ -257,6 +258,7 @@ function ProductWorkspace({ catalog }: { catalog: ProductCatalog }) {
     catalog.markets,
     categorySelection.coverage === "full" ? categorySelection.analysisCategory : null,
     period,
+    useDemoData,
   );
   const nearby = useNearbyStores({
     center: committedCenter,
