@@ -20,4 +20,10 @@ describe("translateEnglishText", () => {
       "Cafe — key indicators to review · When customers are active",
     );
   });
+
+  it("translates the competition legend without mixed Korean labels", () => {
+    expect(translateEnglishText("동일 업종 · 선택 업종과 같은 점포만 집계합니다.")).toBe(
+      "Same category · Counts only stores in the selected category.",
+    );
+  });
 });

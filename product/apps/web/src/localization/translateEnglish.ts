@@ -171,6 +171,8 @@ const replacements: Record<string, string> = {
   "6개 시간대 공식 집계를 0~100으로 정규화해 표시합니다. 개인 이동 정보가 아닙니다.": "Six official time-bucket aggregates are normalized to 0–100. This is not individual movement data.",
   "서울 peer 백분위의 수요·점포당 매출·폐업·업종 밀도·순증률만 반영합니다.": "The score uses Seoul peer percentiles for demand, sales per store, closures, category density, and net openings.",
   "동일 업종 점포": "Same-category stores",
+  "동일 업종": "Same category",
+  "선택 업종과 같은 점포만 집계합니다.": "Counts only stores in the selected category.",
   "점포당 추정매출": "Estimated sales per store",
   "개·폐업 현황": "Openings and closures",
   "상주·직장인구": "Residents and workers",
