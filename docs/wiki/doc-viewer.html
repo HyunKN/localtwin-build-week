@@ -1,0 +1,1063 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LocalTwin Document Viewer</title>
+    <link rel="icon" href="data:," />
+    <style>
+      :root {
+        color: #17211c;
+        background: #f6f8f7;
+        font-family:
+          Inter,
+          Pretendard,
+          "Apple SD Gothic Neo",
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        --green: #03c75a;
+        --green-dark: #08703a;
+        --ink: #17211c;
+        --muted: #617067;
+        --line: rgba(15, 23, 42, 0.12);
+        --surface: #ffffff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background:
+          radial-gradient(circle at 10% 0%, rgba(3, 199, 90, 0.12), transparent 28%),
+          linear-gradient(180deg, #fbfdfc 0%, #f4f7f5 100%);
+      }
+
+      a {
+        color: var(--green-dark);
+        font-weight: 800;
+        text-decoration: none;
+      }
+
+      a:hover,
+      a:focus-visible {
+        text-decoration: underline;
+      }
+
+      .top-links {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        border-bottom: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.88);
+        backdrop-filter: blur(18px);
+      }
+
+      .top-links__inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        width: min(980px, calc(100% - 32px));
+        margin: 0 auto;
+        min-height: 44px;
+        color: var(--muted);
+        font-size: 0.78rem;
+      }
+
+      .top-links__inner div {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .doc-shell {
+        width: min(980px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 30px 0 70px;
+      }
+
+      .doc-card {
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 18px 54px rgba(15, 23, 42, 0.08);
+        padding: clamp(22px, 4vw, 42px);
+      }
+
+      .doc-path {
+        margin: 0 0 16px;
+        color: var(--muted);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.78rem;
+      }
+
+      .content h1 {
+        margin: 0 0 20px;
+        color: #07120d;
+        font-size: clamp(1.9rem, 3vw, 2.5rem);
+        line-height: 1.15;
+        letter-spacing: -0.02em;
+        overflow-wrap: anywhere;
+        text-wrap: balance;
+        word-break: keep-all;
+      }
+
+      .content--compact-title h1 {
+        font-size: clamp(1.75rem, 2.5vw, 2.25rem);
+        line-height: 1.18;
+        letter-spacing: -0.02em;
+      }
+
+      .content h2 {
+        margin: 34px 0 12px;
+        color: #07120d;
+        font-size: 1.65rem;
+        line-height: 1.22;
+      }
+
+      .content h3 {
+        margin: 24px 0 10px;
+        color: #07120d;
+      }
+
+      .content p,
+      .content li {
+        color: #34443c;
+        line-height: 1.72;
+      }
+
+      .content ul,
+      .content ol {
+        padding-left: 1.3rem;
+      }
+
+      .content code {
+        border-radius: 6px;
+        background: #eef6f1;
+        color: #075f32;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        padding: 0.12rem 0.28rem;
+      }
+
+      .content pre {
+        overflow-x: auto;
+        border-radius: 14px;
+        background: #07120d;
+        color: #dcefe6;
+        padding: 16px;
+      }
+
+      .content pre code {
+        background: transparent;
+        color: inherit;
+        padding: 0;
+      }
+
+      .content pre.mermaid {
+        min-height: 220px;
+        border: 1px solid var(--line);
+        background: #f8fbf9;
+        color: #07120d;
+        white-space: pre;
+      }
+
+      .content pre.mermaid svg {
+        display: block;
+        max-width: 100%;
+        height: auto;
+        margin: 0 auto;
+      }
+
+      .content table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 18px 0;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+      }
+
+      .content th,
+      .content td {
+        border: 1px solid var(--line);
+        padding: 10px;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      .content th {
+        background: #eef6f1;
+        color: #1c3429;
+      }
+
+      .content blockquote {
+        margin: 18px 0;
+        border-left: 4px solid var(--green);
+        background: #f2fbf6;
+        color: #244237;
+        padding: 12px 16px;
+      }
+
+      .document-toc {
+        margin: 0 0 30px;
+        border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+        padding: 18px 0;
+      }
+
+      .document-toc strong {
+        display: block;
+        margin-bottom: 12px;
+        color: #07120d;
+        font-size: 0.82rem;
+      }
+
+      .document-toc .document-flowchart {
+        min-height: 170px;
+        margin: 0 0 16px;
+        padding: 12px;
+      }
+
+      .document-toc ol {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 7px 22px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        counter-reset: document-section;
+      }
+
+      .document-toc li {
+        min-width: 0;
+        counter-increment: document-section;
+      }
+
+      .document-toc a {
+        display: grid;
+        grid-template-columns: 2rem minmax(0, 1fr);
+        gap: 8px;
+        align-items: baseline;
+        color: #34443c;
+        font-size: 0.88rem;
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      .document-toc a::before {
+        content: counter(document-section, decimal-leading-zero);
+        color: var(--green-dark);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.72rem;
+      }
+
+      .document-toc a:hover,
+      .document-toc a:focus-visible {
+        color: var(--green-dark);
+        text-decoration: underline;
+      }
+
+      .content .prototype-link {
+        display: inline-flex;
+        min-height: 42px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        background: #07120d;
+        color: #ffffff;
+        padding: 0 16px;
+      }
+
+      .error {
+        border: 1px solid rgba(239, 68, 68, 0.32);
+        border-radius: 14px;
+        background: #fff1f2;
+        color: #991b1b;
+        padding: 14px;
+      }
+
+      .home-hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(240px, 0.42fr);
+        gap: 20px;
+        align-items: end;
+        margin-bottom: 24px;
+      }
+
+      .home-hero h1 {
+        margin-bottom: 14px;
+      }
+
+      .home-hero p {
+        max-width: 720px;
+        margin: 0;
+        color: #405148;
+        font-size: 1.02rem;
+        line-height: 1.7;
+      }
+
+      .home-status {
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: #f4fbf7;
+        padding: 16px;
+      }
+
+      .home-status strong {
+        display: block;
+        margin-bottom: 8px;
+        color: #07120d;
+      }
+
+      .home-actions,
+      .home-card-grid,
+      .home-map-grid {
+        display: grid;
+        gap: 12px;
+      }
+
+      .home-actions {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        margin-bottom: 22px;
+      }
+
+      .home-action,
+      .home-card,
+      .home-map {
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: #ffffff;
+        padding: 16px;
+      }
+
+      .home-action {
+        display: block;
+        color: #07120d;
+      }
+
+      .home-action span,
+      .home-card span {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--green-dark);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.72rem;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+
+      .home-action strong,
+      .home-card strong,
+      .home-map strong {
+        display: block;
+        color: #07120d;
+        font-size: 1rem;
+      }
+
+      .home-action small,
+      .home-card p,
+      .home-map p {
+        display: block;
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 0.88rem;
+        line-height: 1.55;
+      }
+
+      .home-card-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .home-card ul {
+        display: grid;
+        gap: 8px;
+        margin: 14px 0 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .home-card li {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        border-top: 1px solid var(--line);
+        padding-top: 8px;
+      }
+
+      .home-card em {
+        color: var(--muted);
+        font-size: 0.78rem;
+        font-style: normal;
+        font-weight: 700;
+      }
+
+      .home-map-grid {
+        grid-template-columns: 1fr;
+        margin-top: 22px;
+      }
+
+      .home-map pre {
+        overflow-x: auto;
+        margin: 12px 0 0;
+        border-radius: 12px;
+        background: #07120d;
+        color: #dcefe6;
+        font-size: 0.78rem;
+        line-height: 1.55;
+        padding: 12px;
+      }
+
+      .document-tree {
+        margin-top: 22px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: #ffffff;
+        padding: 16px;
+      }
+
+      .document-tree__header {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 12px;
+      }
+
+      .document-tree__header h2 {
+        margin: 0;
+        color: #07120d;
+        font-size: 1.05rem;
+      }
+
+      .document-tree__header p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.82rem;
+      }
+
+      .doc-folder {
+        border-top: 1px solid var(--line);
+      }
+
+      .doc-folder:first-of-type {
+        border-top: 0;
+      }
+
+      .doc-folder summary {
+        cursor: pointer;
+        padding: 12px 4px;
+        color: #07120d;
+        font-weight: 800;
+      }
+
+      .doc-folder summary:hover,
+      .doc-folder summary:focus-visible {
+        color: var(--green-dark);
+      }
+
+      .doc-folder summary small {
+        margin-left: 8px;
+        color: var(--muted);
+        font-size: 0.76rem;
+        font-weight: 700;
+        line-height: 1.45;
+      }
+
+      .doc-files {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px 16px;
+        margin: 0 0 12px 22px;
+        padding: 0;
+        list-style: none;
+      }
+
+      .doc-files a {
+        display: block;
+        overflow-wrap: anywhere;
+        border-radius: 6px;
+        padding: 7px 8px;
+        color: #20332a;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.78rem;
+      }
+
+      .doc-files a:hover,
+      .doc-files a:focus-visible {
+        background: #f0f8f3;
+        color: var(--green-dark);
+      }
+
+      @media (max-width: 760px) {
+        .home-hero,
+        .home-actions,
+        .home-card-grid,
+        .home-map-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .document-toc ol {
+          grid-template-columns: 1fr;
+        }
+
+        .doc-folder summary small {
+          display: block;
+          margin: 4px 0 0 20px;
+        }
+
+        .document-tree__header {
+          align-items: start;
+          flex-direction: column;
+        }
+
+        .doc-files {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="top-links" aria-label="문서 내비게이션">
+      <div class="top-links__inner">
+        <div>
+          <a href="./doc-viewer.html?doc=Home.md">Wiki Home</a>
+          <a href="./knowledge-graph.html">Knowledge Graph</a>
+          <a id="raw-link" href="./Home.md">Raw Markdown</a>
+        </div>
+        <span>Document Viewer</span>
+      </div>
+    </nav>
+
+    <main class="doc-shell">
+      <article class="doc-card">
+        <p id="doc-path" class="doc-path"></p>
+        <div id="content" class="content">문서를 불러오는 중입니다.</div>
+      </article>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const rawDocParam = params.get("doc") || "Home.md";
+      const requestedDoc = normalizeDoc(rawDocParam);
+      const content = document.querySelector("#content");
+      const docPath = document.querySelector("#doc-path");
+      const rawLink = document.querySelector("#raw-link");
+
+      function safeDecode(value) {
+        try {
+          return decodeURIComponent(value);
+        } catch {
+          return value;
+        }
+      }
+
+      function normalizeDoc(input, depth = 0) {
+        let value = safeDecode(String(input || "Home.md")).trim();
+        const nestedMatch = value.match(/(?:^|\/|\.\/)doc-viewer\.html\?doc=(.+)$/);
+        if (nestedMatch && depth < 3) {
+          return normalizeDoc(nestedMatch[1], depth + 1);
+        }
+        if (
+          value.includes("?") ||
+          value.includes("#") ||
+          value.includes("://") ||
+          value.includes("\0")
+        ) {
+          return "Home.md";
+        }
+        value = value.replace(/^\.\//, "");
+        if (!value.endsWith(".md")) return "Home.md";
+        const parts = value.replace(/\\/g, "/").split("/").filter(Boolean);
+        const normalized = [];
+        let leadingParents = 0;
+        for (const part of parts) {
+          if (part === ".") continue;
+          if (part === "..") {
+            leadingParents += 1;
+            if (leadingParents > 1) return "Home.md";
+            normalized.push(part);
+            continue;
+          }
+          leadingParents = 0;
+          normalized.push(part);
+        }
+        const normalizedValue = normalized.join("/");
+        return normalizedValue || "Home.md";
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function docDir(doc) {
+        const index = doc.lastIndexOf("/");
+        return index === -1 ? "" : doc.slice(0, index + 1);
+      }
+
+      function normalizeRelative(baseDoc, href) {
+        if (/^(https?:|mailto:|#)/.test(href)) return href;
+        const nestedViewer = href.match(/(?:^|\.\/)doc-viewer\.html\?doc=(.+)$/);
+        if (nestedViewer) {
+          return `./doc-viewer.html?doc=${encodeURIComponent(normalizeDoc(nestedViewer[1]))}`;
+        }
+        if (href.includes("?") || href.includes("#")) return href;
+        if (href.endsWith(".html")) return href;
+        if (!href.endsWith(".md")) return href;
+        const stack = docDir(baseDoc).split("/").filter(Boolean);
+        href.split("/").forEach((part) => {
+          if (!part || part === ".") return;
+          if (part === "..") stack.push("..");
+          else stack.push(part);
+        });
+        return `./doc-viewer.html?doc=${encodeURIComponent(stack.join("/"))}`;
+      }
+
+      function renderHome() {
+        return `
+          <section class="home-hero">
+            <div>
+              <h1>LocalTwin Docs Home</h1>
+              <p>상권 분석 제품 기획, 기능 스펙, 데이터 기준, 개발 운영 문서를 한 화면에서 찾는 개발문서 포털입니다.</p>
+            </div>
+            <aside class="home-status">
+              <strong>현재 기준</strong>
+              <p>주기능은 공공데이터 기반 상권 분석이고, 3D 탐색은 보조 데모로 관리합니다.</p>
+            </aside>
+          </section>
+
+          <nav class="home-actions" aria-label="주요 문서 바로가기">
+            <a class="home-action" href="./doc-viewer.html?doc=../development/tasks.md"><span>Tasks</span><strong>4주 개발 백로그</strong><small>Epic, 세부 Task, 주차별 목표</small></a>
+            <a class="home-action" href="./doc-viewer.html?doc=localtwin-project-proposal.md"><span>Proposal</span><strong>프로젝트 기획서</strong><small>사용자 시나리오, 화면 구조, 핵심 기능</small></a>
+            <a class="home-action" href="/"><span>Product</span><strong>LocalTwin 상권 분석</strong><small>지도·점포·분석 근거를 조작하는 제품 웹</small></a>
+            <a class="home-action" href="./knowledge-graph.html"><span>Graph</span><strong>Knowledge Graph</strong><small>문서 간 연결 구조</small></a>
+          </nav>
+
+          <section class="home-card-grid">
+            <article class="home-card">
+              <span>Planning</span>
+              <strong>제품과 실행 계획</strong>
+              <p>문제 정의부터 v0.1 개발 순서까지 확인합니다.</p>
+              <ul>
+                <li><a href="./doc-viewer.html?doc=localtwin-product-plan.md">제품 기획서</a><em>problem</em></li>
+                <li><a href="./doc-viewer.html?doc=../development/tasks.md">4주 개발 백로그</a><em>tasks</em></li>
+                <li><a href="./doc-viewer.html?doc=../development/architecture.md">시스템 아키텍처</a><em>structure</em></li>
+                <li><a href="./doc-viewer.html?doc=../module-notes/localtwin-v0.1-scope.md">범위 고정 메모</a><em>scope</em></li>
+                <li><a href="./doc-viewer.html?doc=../module-notes/vision-on-device-portfolio-direction.md">Vision·On-device 포트폴리오 방향</a><em>decision</em></li>
+              </ul>
+            </article>
+            <article class="home-card">
+              <span>Core Specs</span>
+              <strong>핵심 기능 스펙</strong>
+              <p>상권 분석을 먼저 탄탄히 만들고 3D는 보조 기능으로 연결합니다.</p>
+              <ul>
+                <li><a href="./doc-viewer.html?doc=../features/market-analysis.md">공공데이터 기반 상권 분석</a><em>P0</em></li>
+                <li><a href="./doc-viewer.html?doc=../features/market-score-methodology.md">상권 점수 산정 방법론</a><em>P0 logic</em></li>
+                <li><a href="./doc-viewer.html?doc=../features/market-map-experience.md">2.5D 상권 지도</a><em>P0 UI</em></li>
+                <li><a href="./doc-viewer.html?doc=../features/3d-congestion-explorer.md">3DGS 현장 상세보기</a><em>P1</em></li>
+                <li><a href="./doc-viewer.html?doc=../features/person-anonymization-preprocessing.md">사람 영역 익명화</a><em>safety</em></li>
+              </ul>
+            </article>
+            <article class="home-card">
+              <span>Data</span>
+              <strong>데이터 기준</strong>
+              <p>공공데이터와 수동 관찰값을 canonical schema로 연결합니다.</p>
+              <ul>
+                <li><a href="./doc-viewer.html?doc=../data/database-structure.md">데이터베이스 구조와 ERD</a><em>relations</em></li>
+                <li><a href="./doc-viewer.html?doc=../data/data-source-mapping.md">데이터 소스 매핑</a><em>schema</em></li>
+              </ul>
+            </article>
+            <article class="home-card">
+              <span>Development</span>
+              <strong>개발 운영과 검증</strong>
+              <p>핵심 개발 기준만 먼저 보고, 세부 문서는 아래 Document Tree에서 확인합니다.</p>
+              <ul>
+                <li><a href="./doc-viewer.html?doc=../development/overview.md">전체 개발문서</a><em>overview</em></li>
+                <li><a href="./doc-viewer.html?doc=../development/tasks.md">4주 개발 백로그</a><em>tasks</em></li>
+                <li><a href="./doc-viewer.html?doc=../development/architecture.md">시스템 아키텍처</a><em>structure</em></li>
+                <li><a href="./doc-viewer.html?doc=../development/validation.md">검증 가이드</a><em>check</em></li>
+              </ul>
+            </article>
+          </section>
+
+          <section class="home-map-grid">
+            <article class="home-map">
+              <strong>프로젝트 구조</strong>
+              <pre>LocalTwin/
+  README.md
+  product/
+    apps/
+      web/
+      api/
+    data/
+    scripts/
+  docs/
+  scripts/
+  .harness/
+  .githooks/
+  .agents/
+  .codex/</pre>
+            </article>
+          </section>
+
+          <section class="document-tree" aria-labelledby="document-tree-title">
+            <div class="document-tree__header">
+              <h2 id="document-tree-title">Document Tree</h2>
+              <p>폴더를 눌러 접거나 펼치고 파일을 바로 엽니다.</p>
+            </div>
+
+            <details class="doc-folder" open>
+              <summary>data <small>2 files · DB 구조, 데이터 출처와 스키마</small></summary>
+              <ul class="doc-files">
+                <li><a data-doc-path="data/database-structure.md" href="./doc-viewer.html?doc=../data/database-structure.md">database-structure.md</a></li>
+                <li><a data-doc-path="data/data-source-mapping.md" href="./doc-viewer.html?doc=../data/data-source-mapping.md">data-source-mapping.md</a></li>
+              </ul>
+            </details>
+
+            <details class="doc-folder" open>
+              <summary>design <small>1 file · UI 디자인 기준</small></summary>
+              <ul class="doc-files">
+                <li><a data-doc-path="design/design-system.md" href="./doc-viewer.html?doc=../design/design-system.md">design-system.md</a></li>
+              </ul>
+            </details>
+
+            <details class="doc-folder" open>
+              <summary>development <small>12 files · 개발 계획, 구조와 검증</small></summary>
+              <ul class="doc-files">
+                <li><a data-doc-path="development/architecture.md" href="./doc-viewer.html?doc=../development/architecture.md">architecture.md</a></li>
+                <li><a data-doc-path="development/checklist.md" href="./doc-viewer.html?doc=../development/checklist.md">checklist.md</a></li>
+                <li><a data-doc-path="development/conventions.md" href="./doc-viewer.html?doc=../development/conventions.md">conventions.md</a></li>
+                <li><a data-doc-path="development/document-management.md" href="./doc-viewer.html?doc=../development/document-management.md">document-management.md</a></li>
+                <li><a data-doc-path="development/environment.md" href="./doc-viewer.html?doc=../development/environment.md">environment.md</a></li>
+                <li><a data-doc-path="development/git-workflow.md" href="./doc-viewer.html?doc=../development/git-workflow.md">git-workflow.md</a></li>
+                <li><a data-doc-path="development/harness.md" href="./doc-viewer.html?doc=../development/harness.md">harness.md</a></li>
+                <li><a data-doc-path="development/overview.md" href="./doc-viewer.html?doc=../development/overview.md">overview.md</a></li>
+                <li><a data-doc-path="development/pre-development-decisions.md" href="./doc-viewer.html?doc=../development/pre-development-decisions.md">pre-development-decisions.md</a></li>
+                <li><a data-doc-path="development/refactoring-standards.md" href="./doc-viewer.html?doc=../development/refactoring-standards.md">refactoring-standards.md</a></li>
+                <li><a data-doc-path="development/tasks.md" href="./doc-viewer.html?doc=../development/tasks.md">tasks.md</a></li>
+                <li><a data-doc-path="development/validation.md" href="./doc-viewer.html?doc=../development/validation.md">validation.md</a></li>
+                <li><a data-doc-path="development/week1-thursday-progress-report.md" href="./doc-viewer.html?doc=../development/week1-thursday-progress-report.md">week1-thursday-progress-report.md</a></li>
+              </ul>
+            </details>
+
+            <details class="doc-folder">
+              <summary>evaluation <small>4 files · 평가와 실패 기록</small></summary>
+              <ul class="doc-files">
+                <li><a data-doc-path="evaluation/agent-rubric.md" href="./doc-viewer.html?doc=../evaluation/agent-rubric.md">agent-rubric.md</a></li>
+                <li><a data-doc-path="evaluation/evaluation-log.md" href="./doc-viewer.html?doc=../evaluation/evaluation-log.md">evaluation-log.md</a></li>
+                <li><a data-doc-path="evaluation/failure-log.md" href="./doc-viewer.html?doc=../evaluation/failure-log.md">failure-log.md</a></li>
+                <li><a data-doc-path="evaluation/meta-evaluation.md" href="./doc-viewer.html?doc=../evaluation/meta-evaluation.md">meta-evaluation.md</a></li>
+              </ul>
+            </details>
+
+            <details class="doc-folder">
+              <summary>issues <small>1 file · 현재 문제와 해결 추적</small></summary>
+              <ul class="doc-files">
+                <li><a data-doc-path="issues/security-hardening-review.md" href="./doc-viewer.html?doc=../issues/security-hardening-review.md">security-hardening-review.md</a></li>
+              </ul>
+            </details>
+
+            <details class="doc-folder" open>
+              <summary>features <small>5 files · 기능별 요구사항</small></summary>
+              <ul class="doc-files">
+                <li><a data-doc-path="features/3d-congestion-explorer.md" href="./doc-viewer.html?doc=../features/3d-congestion-explorer.md">3d-congestion-explorer.md</a></li>
+                <li><a data-doc-path="features/market-analysis.md" href="./doc-viewer.html?doc=../features/market-analysis.md">market-analysis.md</a></li>
+                <li><a data-doc-path="features/market-score-methodology.md" href="./doc-viewer.html?doc=../features/market-score-methodology.md">market-score-methodology.md</a></li>
+                <li><a data-doc-path="features/market-map-experience.md" href="./doc-viewer.html?doc=../features/market-map-experience.md">market-map-experience.md</a></li>
+                <li><a data-doc-path="features/person-anonymization-preprocessing.md" href="./doc-viewer.html?doc=../features/person-anonymization-preprocessing.md">person-anonymization-preprocessing.md</a></li>
+              </ul>
+            </details>
+
+            <details class="doc-folder">
+              <summary>module-notes <small>1 file · 범위와 결정 메모</small></summary>
+              <ul class="doc-files">
+                <li><a data-doc-path="module-notes/localtwin-v0.1-scope.md" href="./doc-viewer.html?doc=../module-notes/localtwin-v0.1-scope.md">localtwin-v0.1-scope.md</a></li>
+                <li><a data-doc-path="module-notes/vision-on-device-portfolio-direction.md" href="./doc-viewer.html?doc=../module-notes/vision-on-device-portfolio-direction.md">vision-on-device-portfolio-direction.md</a></li>
+              </ul>
+            </details>
+
+            <details class="doc-folder">
+              <summary>operations <small>2 files · 배포와 GPU 실행 검증</small></summary>
+              <ul class="doc-files">
+                <li><a data-doc-path="operations/gpu-scene-validation.md" href="./doc-viewer.html?doc=../operations/gpu-scene-validation.md">gpu-scene-validation.md</a></li>
+                <li><a data-doc-path="operations/production-database-promotion.md" href="./doc-viewer.html?doc=../operations/production-database-promotion.md">production-database-promotion.md</a></li>
+              </ul>
+            </details>
+
+            <details class="doc-folder">
+              <summary>prototypes <small>2 files · 실행 가능한 시연 화면</small></summary>
+              <ul class="doc-files">
+                <li><a data-doc-path="prototypes/core-market-analysis-prototype.html" href="../prototypes/core-market-analysis-prototype.html">core-market-analysis-prototype.html</a></li>
+                <li><a data-doc-path="prototypes/design-guide-visual-comparison.html" href="../prototypes/design-guide-visual-comparison.html">design-guide-visual-comparison.html</a></li>
+              </ul>
+            </details>
+
+            <details class="doc-folder" open>
+              <summary>wiki <small>6 files · 문서 홈과 제품 기획</small></summary>
+              <ul class="doc-files">
+                <li><a data-doc-path="wiki/Home.md" href="./doc-viewer.html?doc=Home.md">Home.md</a></li>
+                <li><a data-doc-path="wiki/doc-viewer.html" href="./doc-viewer.html?doc=Home.md">doc-viewer.html</a></li>
+                <li><a data-doc-path="wiki/knowledge-graph.html" href="./knowledge-graph.html">knowledge-graph.html</a></li>
+                <li><a data-doc-path="wiki/localtwin-product-plan.md" href="./doc-viewer.html?doc=localtwin-product-plan.md">localtwin-product-plan.md</a></li>
+                <li><a data-doc-path="wiki/localtwin-project-proposal.md" href="./doc-viewer.html?doc=localtwin-project-proposal.md">localtwin-project-proposal.md</a></li>
+                <li><a data-doc-path="wiki/localtwin-v0.1-execution-plan.md" href="./doc-viewer.html?doc=localtwin-v0.1-execution-plan.md">localtwin-v0.1-execution-plan.md</a></li>
+              </ul>
+            </details>
+          </section>
+        `;
+      }
+
+      function inline(markdown, currentDoc) {
+        let html = escapeHtml(markdown);
+        html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
+        html = html.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+        html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, href) => {
+          return `<a href="${escapeHtml(normalizeRelative(currentDoc, href))}">${label}</a>`;
+        });
+        return html;
+      }
+
+      function renderTable(lines, currentDoc) {
+        const rows = lines.map((line) =>
+          line
+            .trim()
+            .replace(/^\||\|$/g, "")
+            .split("|")
+            .map((cell) => cell.trim()),
+        );
+        const header = rows[0] || [];
+        const body = rows.slice(2);
+        return `<table><thead><tr>${header
+          .map((cell) => `<th>${inline(cell, currentDoc)}</th>`)
+          .join("")}</tr></thead><tbody>${body
+          .map(
+            (row) =>
+              `<tr>${row.map((cell) => `<td>${inline(cell, currentDoc)}</td>`).join("")}</tr>`,
+          )
+          .join("")}</tbody></table>`;
+      }
+
+      function renderMarkdown(markdown, currentDoc) {
+        const lines = markdown.replace(/\r\n/g, "\n").split("\n");
+        const blocks = [];
+        let paragraph = [];
+        let list = [];
+        let table = [];
+        let code = [];
+        let codeLanguage = "";
+        let inCode = false;
+
+        function flushParagraph() {
+          if (!paragraph.length) return;
+          blocks.push(`<p>${inline(paragraph.join(" "), currentDoc)}</p>`);
+          paragraph = [];
+        }
+
+        function flushList() {
+          if (!list.length) return;
+          blocks.push(
+            `<ul>${list.map((item) => `<li>${inline(item, currentDoc)}</li>`).join("")}</ul>`,
+          );
+          list = [];
+        }
+
+        function flushTable() {
+          if (!table.length) return;
+          blocks.push(renderTable(table, currentDoc));
+          table = [];
+        }
+
+        for (const line of lines) {
+          if (line.startsWith("```")) {
+            if (inCode) {
+              if (codeLanguage === "mermaid") {
+                blocks.push(`<pre class="mermaid">${escapeHtml(code.join("\n"))}</pre>`);
+              } else {
+                blocks.push(`<pre><code>${escapeHtml(code.join("\n"))}</code></pre>`);
+              }
+              code = [];
+              codeLanguage = "";
+              inCode = false;
+            } else {
+              flushParagraph();
+              flushList();
+              flushTable();
+              inCode = true;
+              codeLanguage = line.slice(3).trim().toLowerCase();
+            }
+            continue;
+          }
+          if (inCode) {
+            code.push(line);
+            continue;
+          }
+          if (!line.trim()) {
+            flushParagraph();
+            flushList();
+            flushTable();
+            continue;
+          }
+          if (/^\|.+\|$/.test(line.trim())) {
+            flushParagraph();
+            flushList();
+            table.push(line);
+            continue;
+          }
+          flushTable();
+          const heading = line.match(/^(#{1,4})\s+(.+)$/);
+          if (heading) {
+            flushParagraph();
+            flushList();
+            const level = heading[1].length;
+            blocks.push(`<h${level}>${inline(heading[2], currentDoc)}</h${level}>`);
+            continue;
+          }
+          const listItem = line.match(/^[-*]\s+(.+)$/);
+          if (listItem) {
+            flushParagraph();
+            list.push(listItem[1]);
+            continue;
+          }
+          if (line.startsWith("> ")) {
+            flushParagraph();
+            flushList();
+            blocks.push(`<blockquote>${inline(line.slice(2), currentDoc)}</blockquote>`);
+            continue;
+          }
+          paragraph.push(line.trim());
+        }
+
+        flushParagraph();
+        flushList();
+        flushTable();
+        return blocks.join("\n");
+      }
+
+      function insertDocumentToc() {
+        const headings = Array.from(content.querySelectorAll("h2"));
+        if (!headings.length) return;
+
+        const labels = headings.map((heading, index) => {
+          const id = `section-${index + 1}`;
+          const label = heading.textContent.trim();
+          heading.id = id;
+          return { id, label };
+        });
+
+        const items = labels.map(
+          ({ id, label }) => `<li><a href="#${id}">${escapeHtml(label)}</a></li>`,
+        );
+        const mermaidNode = ({ label }, index) => {
+          const safeLabel = label.replace(/["\[\]{}]/g, "").trim();
+          return `section${index + 1}["${safeLabel}"]`;
+        };
+        const diagramLines = [];
+
+        if (labels.length <= 4) {
+          diagramLines.push("flowchart LR");
+          diagramLines.push(`  ${labels.map(mermaidNode).join(" --> ")}`);
+        } else {
+          const rowSize = 4;
+          const rows = Array.from({ length: Math.ceil(labels.length / rowSize) }, (_, rowIndex) =>
+            labels.slice(rowIndex * rowSize, (rowIndex + 1) * rowSize),
+          );
+          diagramLines.push("flowchart TB");
+          rows.forEach((row, rowIndex) => {
+            const offset = rowIndex * rowSize;
+            diagramLines.push(`  subgraph row${rowIndex + 1}[" "]`);
+            diagramLines.push("    direction LR");
+            diagramLines.push(
+              `    ${row.map((item, index) => mermaidNode(item, offset + index)).join(" --> ")}`,
+            );
+            diagramLines.push("  end");
+            diagramLines.push(`  style row${rowIndex + 1} fill:transparent,stroke:transparent`);
+          });
+          rows.slice(0, -1).forEach((row, rowIndex) => {
+            const lastIndex = rowIndex * rowSize + row.length;
+            diagramLines.push(`  section${lastIndex} --> section${lastIndex + 1}`);
+          });
+        }
+
+        const toc = document.createElement("nav");
+        toc.className = "document-toc";
+        toc.setAttribute("aria-label", "문서 흐름");
+        toc.innerHTML = `<strong>문서 흐름</strong><pre class="mermaid document-flowchart">${escapeHtml(
+          diagramLines.join("\n"),
+        )}</pre><ol>${items.join("")}</ol>`;
+
+        const title = content.querySelector("h1");
+        if (title) {
+          title.insertAdjacentElement("afterend", toc);
+        } else {
+          content.prepend(toc);
+        }
+      }
+
+      async function renderMermaidDiagrams() {
+        const diagrams = content.querySelectorAll("pre.mermaid");
+        if (!diagrams.length || !window.mermaid) return;
+        window.mermaid.initialize({
+          startOnLoad: false,
+          securityLevel: "strict",
+          theme: "base",
+          themeVariables: {
+            primaryColor: "#eef8f1",
+            primaryTextColor: "#07120d",
+            primaryBorderColor: "#62ad7d",
+            lineColor: "#60746a",
+            secondaryColor: "#edf4ff",
+            tertiaryColor: "#ffffff",
+            fontFamily: "Inter, Pretendard, system-ui, sans-serif",
+          },
+        });
+        try {
+          await window.mermaid.run({ nodes: diagrams });
+        } catch (error) {
+          console.warn("Mermaid render failed; raw diagram kept visible.", error);
+        }
+      }
+
+      async function loadDocument() {
+        const canonicalUrl = `./doc-viewer.html?doc=${encodeURIComponent(requestedDoc)}`;
+        if (rawDocParam !== requestedDoc && window.history.replaceState) {
+          window.history.replaceState(null, "", canonicalUrl);
+        }
+        docPath.textContent = requestedDoc;
+        rawLink.href = requestedDoc;
+        content.classList.toggle(
+          "content--compact-title",
+          requestedDoc.endsWith("/features/market-map-experience.md"),
+        );
+        if (requestedDoc === "Home.md") {
+          content.innerHTML = renderHome();
+          return;
+        }
+        try {
+          const response = await fetch(requestedDoc, { cache: "no-store" });
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+          const markdown = await response.text();
+          content.innerHTML = renderMarkdown(markdown, requestedDoc);
+          insertDocumentToc();
+          await renderMermaidDiagrams();
+        } catch (error) {
+          content.innerHTML = `<div class="error">문서를 불러오지 못했습니다: ${escapeHtml(
+            requestedDoc,
+          )}<br />로컬에서는 repository root를 정적 서버로 열어야 합니다.</div>`;
+        }
+      }
+
+      loadDocument();
+    </script>
+  </body>
+</html>
