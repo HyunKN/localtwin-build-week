@@ -19,10 +19,10 @@ The public demo intentionally focuses on three Seoul commercial areas: **Yeonnam
 
 ## Live demo
 
-- Product: https://localtwin-product.vercel.app
+- English submission view: https://localtwin-product-hyunkns-projects.vercel.app/en
 - API health: https://localtwin-api.onrender.com/health
 
-For the English, recording-ready submission screen, open `/en` after running the web app (for example, `http://127.0.0.1:5173/en`). It uses the same checked-in market-analysis snapshot and intentionally excludes the 3DGS path.
+The English submission view is also available locally at `/en` (for example, `http://127.0.0.1:5173/en`). It uses the same checked-in market-analysis snapshot and intentionally excludes the 3DGS path.
 
 The API may need a brief warm-up before the first request.
 
