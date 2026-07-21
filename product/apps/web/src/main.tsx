@@ -13,13 +13,21 @@ const showStorefrontPrototype =
   new URLSearchParams(window.location.search).get("demo") === "storefront";
 const showFlowerMapPrototype =
   new URLSearchParams(window.location.search).get("demo") === "flower-map";
+const showEnglishSubmission = window.location.pathname === "/en";
 const reactRoot = createRoot(root);
 
 function renderApplication(application: ReactNode) {
   reactRoot.render(<StrictMode>{application}</StrictMode>);
 }
 
-if (showFlowerMapPrototype) {
+if (showEnglishSubmission) {
+  renderApplication(<main aria-busy="true">Loading the English submission view…</main>);
+  void import("./submission/EnglishSubmissionApp.tsx")
+    .then(({ EnglishSubmissionApp }) => renderApplication(<EnglishSubmissionApp />))
+    .catch(() =>
+      renderApplication(<main role="alert">The English submission view could not be loaded.</main>),
+    );
+} else if (showFlowerMapPrototype) {
   renderApplication(<main aria-busy="true">꽃 테마 점포 지도를 준비하는 중입니다.</main>);
   void import("./features/map/storefronts/FlowerStorefrontMapPrototype.tsx")
     .then(({ FlowerStorefrontMapPrototype }) => renderApplication(<FlowerStorefrontMapPrototype />))
