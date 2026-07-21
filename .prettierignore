@@ -1,0 +1,13 @@
+node_modules
+dist
+coverage
+.venv
+uv.lock
+pnpm-lock.yaml
+product/data/raw
+product/data/processed
+product/data/scenes
+product/apps/web/.vercel
+product/apps/web/public/data
+product/apps/web/public/map
+intro-page

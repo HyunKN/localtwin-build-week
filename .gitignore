@@ -1,0 +1,43 @@
+# Obsolete local prototype. It is not part of the active LocalTwin application.
+intro-page/
+
+# JavaScript
+node_modules/
+dist/
+coverage/
+.vite/
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.local
+
+# Local data and generated 3D assets
+product/data/raw/*
+!product/data/raw/.gitkeep
+product/data/processed/*
+!product/data/processed/.gitkeep
+product/data/scenes/*
+!product/data/scenes/.gitkeep
+product/apps/web/public/smoke/
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+.vercel/
+.playwright-cli/
+output/
+outputs/
+dist/docs-site/
