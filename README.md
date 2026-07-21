@@ -15,7 +15,7 @@ This project is submitted to **OpenAI Build Week** in the **Apps for your life**
 
 The public demo intentionally focuses on three Seoul commercial areas: **Yeonnam, Hongdae, and Hapjeong**. It is a working, neighborhood-scale vertical slice—not a claim of Seoul-wide coverage.
 
-The repository includes a separate on-site 3D exploration path, but the public demo does not depend on it. It remains outside the production path until privacy, authorization, and quota controls are verified.
+3DGS scene creation is **not part of this submission**. Some supporting scene code remains in the repository, but it is not enabled in the public deployment and is not a submitted or demonstrated feature.
 
 ## Live demo
 
@@ -67,7 +67,7 @@ product/
 
 ## Data and privacy boundary
 
-LocalTwin separates source snapshots, canonical validation data, runtime analysis data, and UI responses. It does not place server credentials in the browser bundle. The public demo excludes unverified user-capture and scene-processing paths.
+LocalTwin separates source snapshots, canonical validation data, runtime analysis data, and UI responses. It does not place server credentials in the browser bundle. Unverified user-capture and 3DGS scene-processing paths are excluded from this submission.
 
 ## License
 
