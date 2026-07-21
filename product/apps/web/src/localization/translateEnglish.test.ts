@@ -14,4 +14,10 @@ describe("translateEnglishText", () => {
       "Foot traffic 1,013,523 people/quarter · Net change +2",
     );
   });
+
+  it("translates category-specific metric guidance", () => {
+    expect(translateEnglishText("카페에서 먼저 볼 지표 · 손님이 움직이는 시간")).toBe(
+      "Cafe — key indicators to review · When customers are active",
+    );
+  });
 });

@@ -1,6 +1,7 @@
 const replacements: Record<string, string> = {
   "서울 상권분석 공식 데이터를 불러오는 중입니다.": "Loading official Seoul commercial-district data.",
   "상권 분석 API에 연결하지 못했습니다. 예시 값으로 대체하지 않았습니다.": "The market-analysis API could not be reached. No sample values were substituted.",
+  "오류를 점검해서 실제 분석 결과를 가져오지 못했습니다. 연결을 다시 확인해 주세요.": "The live analysis could not be loaded. Check the connection and try again.",
   "Demo mode · 검증 snapshot 예시이며 실제 조회 결과가 아닙니다.": "Demo mode · This is a verified snapshot, not a live query result.",
   "현재 근거 범위에서 비교 판단을 지원합니다.": "The available evidence supports a comparative review.",
   "누락 지표는 0점으로 단정하지 않고 component별 50점 중립값 방향으로 수축했습니다.": "Missing indicators are not treated as zero; they are shrunk toward a neutral score of 50 by component.",
@@ -151,6 +152,13 @@ const replacements: Record<string, string> = {
   "분석 근거 없음": "No analysis evidence",
   "현재 공식 분석 근거가 없어 다른 업종의 값을 대신 보여주지 않습니다.": "No official analysis evidence is available, so values from other categories are not substituted.",
   "현재는 실제 점포 위치와 반경 안의 동일 업종 점포 수만 확인할 수 있습니다.": "This view currently shows real store locations and same-category store counts inside the selected radius.",
+  "에서 먼저 볼 지표": " — key indicators to review",
+  "손님이 움직이는 시간": "When customers are active",
+  "영업시간과 인력 배치를 정할 때 봅니다.": "Use this when planning operating hours and staffing.",
+  "주변 카페 경쟁 정도": "Nearby cafe competition",
+  "점포 수와 밀도를 함께 보고 과밀 여부를 판단합니다.": "Review store count and density together to assess possible saturation.",
+  "경쟁 점포 한 곳당 매출 수준": "Estimated sales per competing store",
+  "점포 수가 많아도 수요가 충분한지 비교합니다.": "Compare whether demand remains sufficient despite the number of stores.",
   "선택 분기의 개업 수에서 폐업 수를 뺀 값이며 성공 가능성을 직접 뜻하지 않습니다.": "This is openings minus closures in the selected quarter. It does not directly indicate the likelihood of success.",
   "월별 변화가 아닌 선택 분기 합계입니다. 기간별 추이는 후속 분석에서 제공합니다.": "This is a selected-quarter total, not a monthly change. Period trends are planned for a future analysis.",
   "서울시 추정매출 집계이며 실제 개별 점포 매출이 아닙니다.": "This is a Seoul estimated-sales aggregate, not the actual sales of an individual store.",
@@ -181,6 +189,10 @@ const replacements: Record<string, string> = {
   "유동 인구": "Foot traffic",
   "상권 상주인구": "Market-area residents",
   "상권 직장인구": "Market-area workers",
+  "상권·행정동 인구": "Market-area and administrative-district population",
+  "공간 단위 분리": "Separate spatial units",
+  "서울시 상권 경계": "Seoul market boundary",
+  "조회 중": "Loading",
   "상주 밀도": "Resident density",
   "직장 밀도": "Worker density",
   "상위": "Top",
@@ -207,6 +219,7 @@ export function translateEnglishText(value: string) {
     .replace(/(\d{4})년\s*(\d)분기 기준/g, "$1 Q$2")
     .replace(/(\d{4})년\s*(\d)분기/g, "$1 Q$2")
     .replace(/(\d{4})\.(\d)Q 기준/g, "$1 Q$2")
+    .replace(/(\d+)\/(\d+)위/g, "#$1 of $2")
     .replace(/(\d{2})~(\d{2})시/g, "$1:00–$2:00")
     .replace(/(\d[\d,]*)원/g, "₩$1")
     .replace(/(\d[\d,]*)건/g, "$1 transactions")
