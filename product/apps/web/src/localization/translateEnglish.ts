@@ -81,6 +81,7 @@ const replacements: Record<string, string> = {
   "데이터 기준 시점": "Data reference period",
   "이 화면의 숫자는 이렇게 읽습니다.": "How to read the numbers on this screen.",
   "현재 판정": "Current assessment",
+  "분석 요약": "Analysis summary",
   "신뢰도": "Confidence",
   "근거가 충분하지 않습니다.": "Evidence is insufficient.",
   "데이터 반영 범위": "Data coverage",
@@ -193,6 +194,9 @@ const replacements: Record<string, string> = {
   "높은 값 순 · 성공 순위 아님": "Highest value first · not a success ranking",
   "순위 근거가 없습니다.": "No ranking evidence is available.",
   "유동 인구": "Foot traffic",
+  "유동 수요": "Foot-traffic demand",
+  "점포 순증률": "Net store-growth rate",
+  "폐업률": "Closure rate",
   "상권 상주인구": "Market-area residents",
   "상권 직장인구": "Market-area workers",
   "상권·행정동 인구": "Market-area and administrative-district population",
@@ -243,6 +247,9 @@ export function translateEnglishText(value: string) {
     .replace(/(\d{4})\.(\d)Q 기준/g, "$1 Q$2")
     .replace(/(\d+)개 동 중 (\d+)위/g, "#$2 of $1 districts")
     .replace(/(\d+)\/(\d+)위/g, "#$1 of $2")
+    .replace(/(.+) peer 백분위가 (\d+)로 높아 긍정적입니다\./g, "$1 has a high peer percentile ($2), a positive signal.")
+    .replace(/(.+) peer 백분위가 (\d+)로 높아 주의가 필요합니다\./g, "$1 has a high peer percentile ($2), which warrants caution.")
+    .replace(/(.+) peer 백분위가 (\d+)로 낮아 주의가 필요합니다\./g, "$1 has a low peer percentile ($2), which warrants caution.")
     .replace(/(\d{2})~(\d{2})시/g, "$1:00–$2:00")
     .replace(/(\d[\d,]*)원/g, "₩$1")
     .replace(/(\d[\d,]*)건/g, "$1 transactions")

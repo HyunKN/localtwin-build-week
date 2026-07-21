@@ -38,4 +38,14 @@ describe("translateEnglishText", () => {
       "KOSIS resident registration population · 2025 Q1 · Historical reference · Administrative district",
     );
   });
+
+  it("translates dynamic summary and ranking values", () => {
+    expect(translateEnglishText("분석 요약 · 유동 수요 peer 백분위가 70로 높아 긍정적입니다.")).toBe(
+      "Analysis summary · Foot-traffic demand has a high peer percentile (70), a positive signal.",
+    );
+    expect(translateEnglishText("점포당 추정매출 peer 백분위가 67로 높아 긍정적입니다.")).toBe(
+      "Estimated sales per store has a high peer percentile (67), a positive signal.",
+    );
+    expect(translateEnglishText("3/31위 · 3개 동 중 3위")).toBe("#3 of 31 · #3 of 3 districts");
+  });
 });
